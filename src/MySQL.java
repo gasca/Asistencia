@@ -2,6 +2,7 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -20,6 +21,19 @@ public class MySQL {
     private String horaasistencia;
     private String fechaasistencia;
     
+    private ArrayList<String> FoliosRecibos = new ArrayList<String>();
+    
+    private ArrayList<String> idusuario = new ArrayList<String>();
+    private ArrayList<String> matricula = new ArrayList<String>();
+    private ArrayList<String> nombre = new ArrayList<String>();
+    private ArrayList<String> hoja = new ArrayList<String>();
+    private ArrayList<String> precio = new ArrayList<String>();
+    private ArrayList<String> fecha = new ArrayList<String>();
+    private ArrayList<String> registro = new ArrayList<String>();
+    
+    
+    VistaLibre ViewFreeAll = new VistaLibre();
+                    
     
     
     public MySQL()
@@ -28,9 +42,156 @@ public class MySQL {
         con.MySQLConnect();
     }
     
+  
+    
+    public void CreateViewAll(){
+    
+       
+          try{
+            s = con.conexion.createStatement();
+            s.execute("CREATE  OR REPLACE VIEW AsistenciaAlDia AS SELECT `Alumno`.`Matricula`, `Alumno`.`Nombre`, `HorarioLibre`.`Hora_Entrada`, `HorarioLibre`.`Hora_Salida`, `Sala`.`Sala` FROM `horariolibre` INNER JOIN `Alumno` ON   `HorarioLibre`.`ID_Usuario` = `Alumno`.`ID_Usuario` INNER JOIN `Sala` ON `horariolibre`.`ID_Sala` = `Sala`.`ID_Sala`  WHERE `HorarioLibre`.`Fecha` = CURDATE()");
+            
+              }catch(SQLException ex){
+    
+        Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+    
+    }
+          
+    }
+    public void CreateViewAllNotExit(){
+    
+       
+          try{
+            s = con.conexion.createStatement();
+            s.execute("CREATE  OR REPLACE VIEW AsistenciaAlDia AS SELECT `Alumno`.`Matricula`, `Alumno`.`Nombre`, `HorarioLibre`.`Hora_Entrada`, `HorarioLibre`.`Hora_Salida`, `Sala`.`Sala` FROM `horariolibre` INNER JOIN `Alumno` ON   `HorarioLibre`.`ID_Usuario` = `Alumno`.`ID_Usuario` INNER JOIN `Sala` ON `horariolibre`.`ID_Sala` = `Sala`.`ID_Sala`  WHERE `HorarioLibre`.`Fecha` = CURDATE() and `HorarioLibre`.`Hora_Salida` = '00:00:00'");
+            
+              }catch(SQLException ex){
+    
+        Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+    
+    }
     
     
-      public void Guardar_Usuario(int matricula, int id_grupo,  String nombre)
+    }
+    
+    public void AddViewAll(){
+           
+          try{
+            s = con.conexion.createStatement();
+            rs = s.executeQuery("Select *From AsistenciaAlDia");
+      
+                while(rs.next())
+                {
+                    
+                   this.ViewFreeAll.setMa(rs.getString(1));
+                   this.ViewFreeAll.setUs(rs.getString(2));
+                   this.ViewFreeAll.setEn(rs.getString(3));
+                   this.ViewFreeAll.setSa(rs.getString(4));
+                 //System.out.print(resultado);
+                }
+        
+                  s.close();
+                  
+                  
+                 // for (int i = 0; i < this.ViewFreeAll.getUsuario().size(); i++) {
+                   
+                  //     System.out.println("Estos son los valores de las vistas " + this.ViewFreeAll.getEntrada().get(i));
+                       
+                      
+                  //       }
+                  
+            
+          
+        
+              }catch(SQLException ex){
+    
+        Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+    
+    }
+    
+    
+    
+    }
+    
+       
+    public int SearchOnViewUser(String Matricula)
+      {
+        int i=0;
+        
+            try{
+                    s = con.conexion.createStatement();
+                    rs = s.executeQuery("select Nombre from  AsistenciaAlDia Where Matricula = " + Matricula);
+                    
+                    while(rs.next())
+                    {
+                    i++;
+                    //  System.out.println("Encontrado " + i);
+                    }
+                    
+                  
+
+                    s.close();
+            }catch(SQLException ex){
+                  
+                Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+
+            }
+            
+            return i;
+    
+      }
+      
+       
+       
+      public void AddViewAllNotExit(){
+           
+                   this.ViewFreeAll.Salida.clear();
+                   this.ViewFreeAll.Usuario.clear();
+                   this.ViewFreeAll.Entrada.clear();
+                   this.ViewFreeAll.Matricula.clear();
+                    this.ViewFreeAll.Sala.clear();
+                   this.ViewFreeAll.valor.clear();
+          
+          try{
+            s = con.conexion.createStatement();
+            rs = s.executeQuery("Select *From AsistenciaAlDia");
+      
+                while(rs.next())
+                {
+                    
+                   this.ViewFreeAll.setMa(rs.getString(1));
+                   this.ViewFreeAll.setUs(rs.getString(2));
+                   this.ViewFreeAll.setEn(rs.getString(3));
+                   this.ViewFreeAll.setSa(rs.getString(4));
+                   this.ViewFreeAll.setSal(rs.getString(5));
+                   this.ViewFreeAll.setVa(false);
+                 //System.out.print(resultado);
+                }
+        
+                  s.close();
+                  
+                  
+             /*     for (int i = 0; i < this.ViewFreeAll.getUsuario().size(); i++) {
+                   
+                       System.out.println("Estos son los valores de las vistas " + this.ViewFreeAll.getEntrada().get(i));
+                       
+                      
+                         }
+                  */
+            
+          
+        
+              }catch(SQLException ex){
+    
+        Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+    
+    }
+    
+    
+    
+    }
+    
+       public void Guardar_Usuario(int matricula, int id_grupo,  String nombre)
     {
    
      
@@ -56,16 +217,138 @@ public class MySQL {
     
     
     
-    public void Guardar_HorarioLibre(int matricula, int sala,  int Alumno)
+    
+    
+    //-------------Consultas de recibos------------------------------------------------------
+      public void ObtenerFolios()
+      {
+    
+        
+    try{
+            s = con.conexion.createStatement();
+            rs = s.executeQuery("select Folio from Recibo");
+            
+            while(rs.next())
+                {
+                   this.setFoliosRecibos(rs.getString(1));
+                 //System.out.print(resultado);
+                }
+        
+            s.close();
+    }catch(SQLException ex){
+    
+        Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+    
+    }
+    
+      }
+      
+      
+            public void Datos_Recibos()
+      {
+    
+          this.FoliosRecibos.clear();
+          this.hoja.clear();
+          this.precio.clear();
+          this.fecha.clear();
+          this.registro.clear();
+          this.nombre.clear();
+          this.matricula.clear();
+        
+        try{
+                s = con.conexion.createStatement();
+                rs = s.executeQuery("SELECT `Recibo`.`Folio`,`Recibo`.`hoja`,`Recibo`.`Precio`,`Recibo`.`Fecha`,`Recibo`.`Registro`, `Alumno`.`Nombre`,`Alumno`.`Matricula` FROM `recibo` INNER JOIN  `Alumno` ON `Recibo`.`ID_Usuario` = `Alumno`.`ID_Usuario`");
+
+                while(rs.next())
+                    {
+                      
+                        this.setFoliosRecibos(rs.getString(1));
+                        this.setHoja(rs.getString(2));
+                        this.setPrecio(rs.getString(3));
+                        this.setFecha(rs.getString(4));
+                        //System.out.println(rs.getString(5));
+                        this.setRegistro(rs.getString(5));
+                        this.setNombre(rs.getString(6));
+                        this.setMatricula(rs.getString(7));
+
+                    }
+
+                s.close();
+        }catch(SQLException ex){
+
+            Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+    
+      }
+      
+      
+       
+    //-------------Consultas de recibos------------------------------------------------------
+      public double ObtenerPrecio(){
+            double precio = 0.0;
+        
+         try{
+            s = con.conexion.createStatement();
+            rs = s.executeQuery("select Precio from Precio");
+            
+            while(rs.next())
+                {
+                  precio = Double.parseDouble(rs.getString(1));
+                 //System.out.print(resultado);
+                }
+           
+
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, "Error al capturar el precio SQL");
+            Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+    
+   
+        return precio;
+    }
+   
+    
+    
+    
+      
+      public void Guardar_Recibo(int idusuario, int folio, int hoja, int precio, String fecha ){
+      
+             
+      try{
+         this.Query = "INSERT INTO `ceco`.`Recibo` (`ID_Recibo`,`ID_Usuario`,`Folio`,`Hoja`, `Precio`,`Fecha`) VALUES "
+                + "(NULL , '"+ idusuario + "', '"+  folio + "', '"+ hoja +"', '"+ precio +"', '"+fecha +"', '"+ this.Get_FechaCompleta() +"')";
+        
+             s =  con.comando = con.conexion.createStatement();
+              /*con.registro = con.comando.executeQuery(Query);*/
+            con.comando.executeUpdate(Query);
+    
+    
+    }catch(SQLException ex){
+        System.out.println("Error faltal");
+        Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+
+    }
+      
+      }
+      
+      
+      
+      
+      
+    //---------------------------------------------------------------------------------------------------
+    
+    public void Guardar_HorarioLibre(int idusuario, int sala)
     {
    
      
         
     try{
-         this.Query = "INSERT INTO `ceco`.`horariolbre` (`ID_Horario`,`ID_Sala`,`ID_Alumno`,`Hora_Entrada`, `Hora_Salida`,`Fecha`,`Comentarios`) VALUES "
-                + "(NULL , '"+ sala + "', '"+  matricula + "', '"+ this.Get_Hora()  +"', '00:00','"+ this.Get_Fecha()  +"', 'funciona' )";
+         this.Query = "INSERT INTO `ceco`.`horariolibre` (`ID_Horario`,`ID_Sala`,`ID_Usuario`,`Hora_Entrada`, `Hora_Salida`,`Fecha`,`Comentarios`) VALUES "
+                + "(NULL , '"+ sala + "', '"+  idusuario + "', '"+ this.Get_Hora()  +"', '00:00','"+ this.Get_Fecha()  +"', 'funciona' )";
         
-              con.comando = con.conexion.createStatement();
+             s =  con.comando = con.conexion.createStatement();
               /*con.registro = con.comando.executeQuery(Query);*/
             con.comando.executeUpdate(Query);
     
@@ -73,7 +356,76 @@ public class MySQL {
     }catch(SQLException ex){
     
         Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+        JOptionPane.showMessageDialog(null, "Error al capturar el hora libre");
+    }
     
+   
+    
+    }
+    
+    public void Modificar_Salida_Asistencia(int idsu)
+    {
+   
+        System.out.println("idsuaurio en modificar " + idsu);
+    try{
+         this.Query = "UPDATE `HorarioLibre` SET `Hora_Salida`= '" + this.Get_Hora() +"' WHERE `ID_Usuario`=" + idsu; 
+              
+             s =  con.comando = con.conexion.createStatement();
+             con.comando.executeUpdate(this.Query);
+               
+             
+    
+    
+    }catch(SQLException ex){
+    
+        Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+        JOptionPane.showMessageDialog(null, "Error al actualizar horalibre salida");
+    }
+    
+   
+    
+    }
+    
+        public void Modificar_Recibo(int idrecibo,int folio, int idusuario, int hojas, double importe, String fecha)
+    {
+    System.out.println("IDRecibo " + idrecibo + "   " + folio +"   " + idusuario + "   " + hojas +"  "+ importe + "    " + fecha  );
+        
+    try{
+         this.Query = "UPDATE `recibo` SET `ID_Usuario`=" + idrecibo +",`Folio`= "+folio+",`hoja`="+hojas+",`Precio`="+importe+",`Fecha`='"+fecha+"',`Registro`= '"+this.Get_FechaCompleta()+"' WHERE `ID_Recibo`=" + 4; 
+              
+             s =  con.comando = con.conexion.createStatement();
+             con.comando.executeUpdate(this.Query);
+               
+             
+    
+    
+    }catch(SQLException ex){
+    
+        Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+        JOptionPane.showMessageDialog(null, "Error al actualizar datos del recibo");
+    }
+    
+   
+    
+    }
+    
+      public void EliminarRecibo(int idrecibo)
+    {
+    
+        
+    try{
+         this.Query = "DELETE FROM `ceco`.`recibo` WHERE `recibo`.`ID_Recibo` =" + idrecibo;
+              
+             s =  con.comando = con.conexion.createStatement();
+             con.comando.executeUpdate(this.Query);
+               
+             
+    
+    
+    }catch(SQLException ex){
+    
+        Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex);
+        JOptionPane.showMessageDialog(null, "Error al eliminar datos del recibo");
     }
     
    
@@ -83,43 +435,77 @@ public class MySQL {
     
     
     
-    
-    
-       public int Get_IDMatricula(int Matricula){
-    
+       public int Get_IDUsuario(int Matricula){
+   
          String resultado="";
-         int idm = 0;
+         System.out.println("matricula en get usuario " +  Matricula);
+        
         try{
             s = con.conexion.createStatement();
-            rs = s.executeQuery("select ID_Usuario from Alumno where Matricula="+ Matricula);
+           rs = s.executeQuery("select ID_Usuario from Alumno where Matricula="+ Matricula);
             
-            while(rs.next())
+          
+                while(rs.next())
                 {
                  resultado = rs.getString(1);
-                 //System.out.print(resultado);
+                 System.out.println("Que es get idusuario get "+ resultado);
                 }
+            
+         
+        }catch(SQLException ex1)
+        {
+            System.out.println("Error al obtener id");
+            //JOptionPane.showMessageDialog(null, "Error en consulta de base de datos usuario" + ex1);
+             Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex1);
+             //resultado ="0";
+        }
+     
+     
+           return Integer.parseInt(resultado);
+    
+    }
+       
+       public int Get_IDRecibo(int folio){
+   
+           System.out.println("Este es el folio que se pasa IDRecibo "+ folio);
            
+         String resultado="";
+        
+        try{
+            s = con.conexion.createStatement();
+            rs = s.executeQuery("select ID_Recibo from Recibo where Folio="+ folio);
+                     
+                while(rs.next())
+                {
+                 resultado = rs.getString(1);
+                 System.out.print("De la consulta de ID SE OBTUBO  "+ resultado);
+                }
+            
+          
             
         }catch(SQLException ex1)
         {
-            JOptionPane.showMessageDialog(null, "Error en consulta de base de datos Hoja" + ex1);
+            System.out.println("Error al obtener id");
+            //JOptionPane.showMessageDialog(null, "Error en consulta de base de datos usuario" + ex1);
              Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex1);
              resultado ="0";
         }
-        return Integer.parseInt(resultado);
+     
+     
+           return Integer.parseInt(resultado);
     
     }
     
     
     
     
-    public int Get_Hoja(int IDMatricula){
+    public int Get_HojasRecibos(int IDMatricula){
     
-         String resultado="";
-         int hojas = -1;
+         String resultado="0";
+         int hojas;
         try{
             s = con.conexion.createStatement();
-            rs = s.executeQuery("select hoja from hoja where ID_Usuario="+ IDMatricula);
+            rs = s.executeQuery("SELECT ifnull( SUM( `Recibo`.`hoja` ) , 0 ) AS HojasRecibo FROM `Recibo` WHERE `Recibo`.`ID_Usuario` ="+ IDMatricula);
             
             while(rs.next())
                 {
@@ -130,29 +516,63 @@ public class MySQL {
             s.close(); 
         }catch(SQLException ex1)
         {
-            JOptionPane.showMessageDialog(null, "Error en consulta de base de datos Hoja" + ex1);
+            JOptionPane.showMessageDialog(null, "Error en consulta de base de datos Recibos**  " + ex1);
              Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex1);
-             resultado ="-1";
+             resultado ="-99";
         }
        
+        if((resultado!=null))
+        {
+         resultado ="0";
+         System.out.println("La consulta no arrojo valores");
+        }
+        
         return hojas = Integer.parseInt(resultado);
         
     }
     
     
     
+    public int Get_HojasImpresiones(int IDMatricula){
     
-        public String Get_Alumno(){
+         String resultado="0";
+         int hojas;
+        try{
+            s = con.conexion.createStatement();
+            rs = s.executeQuery("SELECT ifnull( SUM( `Impresion`.`hoja` ) , 0 ) AS HojasImpresion FROM `Impresion` WHERE `Impresion`.`ID_Usuario` = "+ IDMatricula);
+          while(rs.next())
+                {
+                 resultado = rs.getString(1);
+                 System.out.print("Que es  "+ resultado);
+                }
+            
+          
+            
+           
+            s.close(); 
+        }catch(SQLException ex1)
+        {
+            JOptionPane.showMessageDialog(null, "Error en consulta de base de datos Impresion Hoja  " + ex1);
+             Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex1);
+             resultado ="0";
+        }
+     
+        
+        return hojas = Integer.parseInt(resultado);
+        
+    }
     
+        public String Get_Nombre(String usuario){
+        System.out.println("usuario " + usuario);
          String resultado="";
         try{
             s = con.conexion.createStatement();
-            rs = s.executeQuery("select Nombre from Alumno");
+            rs = s.executeQuery("select Nombre from Alumno where Matricula = " + usuario);
             
             while(rs.next())
                 {
                  resultado = rs.getString(1);
-                 //System.out.print(resultado);
+                 System.out.print(resultado);
                 }
            
             
@@ -160,19 +580,67 @@ public class MySQL {
         {
             JOptionPane.showMessageDialog(null, "Error en consulta de base de datos Alumno" + ex1);
              Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex1);
+             resultado ="Alumno perfecto";
+        }
+        return resultado;
+    
+    }
+       
+          public String Get_IDUsuario(String idusuario){
+       
+         String resultado="";
+        try{
+            s = con.conexion.createStatement();
+            rs = s.executeQuery("select ID_Usuario from Alumno where Matricula = " + Integer.parseInt(idusuario));
+            
+            while(rs.next())
+                {
+                 resultado = rs.getString(1);
+                // System.out.print("imprime" + resultado);
+                }
+           
+            
+        }catch(SQLException ex1)
+        {
+            JOptionPane.showMessageDialog(null, "Error en consulta de base de datos ID_Usuario" + ex1);
+             Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex1);
+             resultado ="Alumno perfecto";
+        }
+        return resultado;
+    
+    }
+       
+        public String Get_Fecha(){
+    
+         String resultado="";
+        try{
+            s = con.conexion.createStatement();
+            rs = s.executeQuery("select CurDate()");
+            
+            while(rs.next())
+                {
+                 resultado = rs.getString(1);
+                 this.setFechaasistencia(resultado);
+                 //System.out.print(resultado);
+                }
+           
+             s.close();
+        }catch(SQLException ex1)
+        {
+            JOptionPane.showMessageDialog(null, "Error en obtener fecha" + ex1);
+             Logger.getLogger(MySQL.class.getName()).log(Level.SEVERE, null, ex1);
              resultado ="00/00/00";
         }
         return resultado;
     
     }
     
-    
-    public String Get_Fecha(){
+    public String Get_FechaCompleta(){
     
          String resultado="";
         try{
             s = con.conexion.createStatement();
-            rs = s.executeQuery("select CurDate()");
+            rs = s.executeQuery("select Now()");
             
             while(rs.next())
                 {
@@ -243,6 +711,118 @@ public class MySQL {
      */
     public void setFechaasistencia(String fechaasistencia) {
         this.fechaasistencia = fechaasistencia;
+    }
+
+    /**
+     * @return the FoliosRecibos
+     */
+    public ArrayList<String> getFoliosRecibos() {
+        return FoliosRecibos;
+    }
+
+    /**
+     * @param FoliosRecibos the FoliosRecibos to set
+     */
+    public void setFoliosRecibos(String FoliosRecibos) {
+        this.FoliosRecibos.add(FoliosRecibos);
+    }
+
+    /**
+     * @return the idusuario
+     */
+    public ArrayList<String> getIdusuario() {
+        return idusuario;
+    }
+
+    /**
+     * @param idusuario the idusuario to set
+     */
+    public void setIdusuario(ArrayList<String> idusuario) {
+        this.idusuario = idusuario;
+    }
+
+    /**
+     * @return the matricula
+     */
+    public  String getMatricula(int i) {
+        return matricula.get(i);
+    }
+
+    /**
+     * @param matricula the matricula to set
+     */
+    public void setMatricula(String matricula) {
+        this.matricula.add(matricula);
+    }
+
+    /**
+     * @return the nombre
+     */
+    public String getNombre(int i) {
+        return nombre.get(i);
+    }
+
+    /**
+     * @param nombre the nombre to set
+     */
+    public void setNombre(String nombre) {
+        this.nombre.add(nombre);
+    }
+
+    /**
+     * @return the hoja
+     */
+    public String getHojaRecibo(int i) {
+        return hoja.get(i);
+    }
+
+    /**
+     * @param hoja the hoja to set
+     */
+    public void setHoja(String hoja) {
+        this.hoja.add(hoja);
+    }
+
+    /**
+     * @return the precio
+     */
+    public String getPrecio(int i) {
+        return precio.get(i);
+    }
+
+    /**
+     * @param precio the precio to set
+     */
+    public void setPrecio(String precio) {
+        this.precio.add(precio);
+    }
+
+    /**
+     * @return the fecha
+     */
+    public String getFecha(int i) {
+        return fecha.get(i);
+    }
+
+    /**
+     * @param fecha the fecha to set
+     */
+    public void setFecha(String fecha) {
+        this.fecha.add(fecha);
+    }
+
+    /**
+     * @return the registro
+     */
+    public ArrayList<String> getRegistro() {
+        return registro;
+    }
+
+    /**
+     * @param registro the registro to set
+     */
+    public void setRegistro(String registro) {
+        this.registro.add(registro);
     }
     
 }
